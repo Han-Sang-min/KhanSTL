@@ -1,10 +1,10 @@
-#ifndef SCENE_META_HPP
-#define SCENE_META_HPP
+#ifndef META_HPP
+#define META_HPP
 
 #include <cstdint>
 #include <type_traits>
 
-namespace scene
+namespace khan
 {
 
 namespace meta
@@ -56,6 +56,6 @@ struct isInList<T, TypeList<First, Next> >
 
 } // meta
 
-} // scene
+} // khan
 
-#endif // SCENE_META_HPP
+#endif // META_HPP

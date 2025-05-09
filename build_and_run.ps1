@@ -1,11 +1,19 @@
-# … your existing cleanup …
+param(
+    [switch]$Clean
+)
 
 # 1) Create separate Debug build dir
-Write-Host "Creating debug build directory..."
-if (Test-Path "build") {
-    Remove-Item -Recurse -Force "build"
+if ($Clean) {
+    Write-Host "Cleaning build directory..."
+    if (Test-Path "build") {
+        Remove-Item -Recurse -Force "build"
+    }
 }
-New-Item -ItemType Directory -Path "build" | Out-Null
+
+if (!(Test-Path "build")) {
+    Write-Host "Creating build directory..."
+    New-Item -ItemType Directory -Path "build" | Out-Null
+}
 
 # 2) Configure CMake in Debug mode
 Write-Host "Configuring CMake (Debug)..."
@@ -32,6 +40,6 @@ if ($LASTEXITCODE -ne 0) {
 
 # 4) Run your debug exe
 Write-Host "Running Debug executable..."
-& .\tree_tests.exe
+& .\unit_tests.exe
 
 Pop-Location

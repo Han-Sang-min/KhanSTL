@@ -1,0 +1,7 @@
+add_test([=[ArrayTest.CompareWithStdArray]=]  C:/Users/HANS/KhanSTL/build/unit_tests.exe [==[--gtest_filter=ArrayTest.CompareWithStdArray]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[ArrayTest.CompareWithStdArray]=]  PROPERTIES WORKING_DIRECTORY C:/Users/HANS/KhanSTL/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[StringTest.CompareWithStdString]=]  C:/Users/HANS/KhanSTL/build/unit_tests.exe [==[--gtest_filter=StringTest.CompareWithStdString]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[StringTest.CompareWithStdString]=]  PROPERTIES WORKING_DIRECTORY C:/Users/HANS/KhanSTL/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[VectorTest.CompareWithStdVectorAllOps]=]  C:/Users/HANS/KhanSTL/build/unit_tests.exe [==[--gtest_filter=VectorTest.CompareWithStdVectorAllOps]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[VectorTest.CompareWithStdVectorAllOps]=]  PROPERTIES WORKING_DIRECTORY C:/Users/HANS/KhanSTL/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  unit_tests_TESTS ArrayTest.CompareWithStdArray StringTest.CompareWithStdString VectorTest.CompareWithStdVectorAllOps)
