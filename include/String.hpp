@@ -94,7 +94,7 @@ private:
     char      data_[N+1];
     size_type size_;
 
-    [[noreturn]] static void error_trap() {
+    [[noreturn]] void error_trap() {
         for (;;) {}
     }
 };

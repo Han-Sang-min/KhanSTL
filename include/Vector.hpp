@@ -97,7 +97,6 @@ private:
     size_type   size_;
 
     [[noreturn]] void error_trap() {
-        std::cerr << "Error: Vector out of bounds access!" << std::endl;
         while(1);
     }
 };
