@@ -94,7 +94,9 @@
         "codecvt": "cpp",
         "string_view": "cpp",
         "numbers": "cpp",
-        "text_encoding": "cpp"
+        "text_encoding": "cpp",
+        "any": "cpp",
+        "semaphore": "cpp"
     },
     "github.copilot.enable": {
         "*": true,

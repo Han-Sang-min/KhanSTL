@@ -7,9 +7,6 @@
 namespace khan
 {
 
-namespace meta
-{
-
 /* Utile */
 template<typename First, typename Next>
 struct TypeList;
@@ -53,8 +50,6 @@ struct isInList<T, TypeList<First, Next> >
         std::is_same<T, First>::value,
         std::true_type,
         typename isInList<T, Next>::type >::type {};
-
-} // meta
 
 } // khan
 

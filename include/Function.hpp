@@ -1,110 +1,130 @@
-#ifndef FUNCTION_HPP
-#define FUNCTION_HPP
+#ifndef KHAN_FUNCTION_HPP
+#define KHAN_FUNCTION_HPP
+
+#include <cstdint>
+#include "meta/utility.hpp"
 
 namespace khan {
 
-//--- 1) Functor 전용 Ops를 분리한 템플릿 ---------------------------------
 template<typename F, typename R, typename... Args>
 struct FunctorOps {
-    static const typename Function<R(Args...),0>::Ops ops;  // BufferSize는 무시
-};
+    struct Ops {
+        R    (*invoke)(void*, Args...);
+        void (*destroy)(void*);
+        void (*construct)(void*, const void*);
+    };
 
-// 실제 정의: 한번만 생성된다
-template<typename F, typename R, typename... Args>
-const typename Function<R(Args...),0>::Ops
-FunctorOps<F,R,Args...>::ops = {
-    // invoke
-    +[](void* buf, Args... a) -> R {
-        return (*reinterpret_cast<F*>(buf))(a...);
-    },
-    // destroy
-    +[](void* buf) {
-        reinterpret_cast<F*>(buf)->~F();
-    },
-    // construct
-    +[](void* buf, void* fptr) {
-        new (buf) F(*reinterpret_cast<F*>(fptr));
+    static const Ops& ops() {
+        static const Ops instance = {
+            // invoke
+            /* 
+                I don't know if it is okay to cast `F*`, because as far I know, the C standard 
+                doesn't allow casting function pointer to `void*` and vice versa.
+                For now, implement it by casting it as a double pointer and referencing it.
+            */
+            +[](void* buf, Args... a) -> R {
+                return (*reinterpret_cast<F*>(buf))(khan::forward<Args>(a)...);
+            },
+            // destroy
+            +[](void* buf) {
+                reinterpret_cast<F*>(buf)->~F();
+            },
+            // construct (copy-construct)
+            +[](void* buf, const void* fptr) {
+                new (buf) F(*reinterpret_cast<const F*>(fptr));
+            }
+        };
+        return instance;
     }
 };
 
-//--- 2) Function 정의 ---------------------------------------------------
-template<typename Signature, unsigned BufferSize>
+template<typename Signature, uint32_t BufferSize>
 class Function;
 
-template<typename R, typename... Args, unsigned BufferSize>
+template<typename R, typename... Args, uint32_t BufferSize>
 class Function<R(Args...), BufferSize> {
 public:
-    Function(): ops_(nullptr) {}
-    ~Function(){ reset(); }
+    Function() : ops_(nullptr) {}
+    ~Function() { reset(); }
 
     R operator()(Args... a) const {
-        if (!ops_) while(1);
-        return ops_->invoke(storage_, a...);
+        return ops_->invoke(storage_, khan::forward<Args>(a)...);
     }
-    explicit operator bool() const { return ops_; }
+
+    explicit operator bool() const {
+        return ops_ != nullptr;
+    }
 
     void reset() {
-        if (ops_) ops_->destroy(storage_);
-        ops_ = nullptr;
+        if (ops_) {
+            ops_->destroy(storage_);
+            ops_ = nullptr;
+        }
     }
 
-    // 함수포인터 대입
+    /* A non-closure type value is being received */
     Function& operator=(R(*fp)(Args...)) {
         reset();
         if (fp) {
-            ops_ = &func_ops;
-            func_ops.construct(storage_, &fp);
+            *reinterpret_cast<R(**)(Args...)>(storage_) = fp;
+            ops_ = &get_func_ops();
         }
         return *this;
     }
 
-    // 임의의 F 대입
+    // construct from any Functor F
     template<typename F>
-    Function(F f) { assign(f); }
+    Function(F f) {
+        assign(khan::move(f));
+    }
 
     template<typename F>
     Function& operator=(F f) {
-        assign(f);
+        assign(khan::move(f));
         return *this;
     }
 
 private:
     struct Ops {
-        R (*invoke)(void*, Args...);
+        R    (*invoke)(void*, Args...);
         void (*destroy)(void*);
-        void (*construct)(void*, void*);
+        void (*construct)(void*, const void*);
     };
 
-    alignas(alignof(void*)) unsigned char storage_[BufferSize];
-    const Ops* ops_;
+    alignas(void*) unsigned char storage_[BufferSize];
+    const Ops*           ops_;
 
-    // assign에서는 FunctorOps<F,R,Args...>::ops만 참조
+    // function-local static for function-pointer Ops
+    static const Ops& get_func_ops() {
+        static const Ops instance = {
+            // invoke through stored function pointer
+            +[](void* buf, Args... a) -> R {
+                R(*fp)(Args...) = *reinterpret_cast<R(**)(Args...)>(buf);
+                return fp(khan::forward<Args>(a)...);
+            },
+            // destroy: no-op for plain function pointers
+            +[](void*) {},
+            // construct: copy the function pointer stored at fptr
+            +[](void* buf, const void* fptr) {
+                *reinterpret_cast<R(**)(Args...)>(buf) =
+                    *reinterpret_cast<R(**)(Args...)>(fptr);
+            }
+        };
+        return instance;
+    }
+
     template<typename F>
-    void assign(F f) {
+    void assign(F&& f) {
         reset();
-        static_assert(sizeof(F) <= BufferSize, "Too large");
-
-        new (storage_) F(f);
-        ops_ = &FunctorOps<F,R,Args...>::ops;
-    }
-
-    static const Ops func_ops;
-};
-
-// 함수포인터용 v-table (원래대로)
-template<typename R, typename... Args, unsigned BufferSize>
-const typename Function<R(Args...),BufferSize>::Ops
-Function<R(Args...),BufferSize>::func_ops = {
-    +[](void* buf, Args... a)->R {
-        R(*fp)(Args...)= *reinterpret_cast<R(**)(Args...)>(buf);
-        return fp(a...);
-    },
-    +[](void*){},
-    +[](void* buf, void* fptr){
-        *reinterpret_cast<R(**)(Args...)>(buf)
-          = *reinterpret_cast<R(**)(Args...)>(fptr);
+        static_assert(sizeof(F) <= BufferSize,
+                      "Functor too large for Function buffer");
+        new (storage_) F(khan::forward<F>(f));
+        ops_ = &FunctorOps<F, R, Args...>::ops();
     }
 };
+
+extern template class Function<void(void), 32>;
 
 } // namespace khan
-#endif // FUNCTION_HPP
+
+#endif // KHAN_FUNCTION_HPP
