@@ -28,8 +28,8 @@ public:
     constexpr bool      empty()    const { return size_ == 0; }
     constexpr bool      full()     const { return size_ == N; }
 
-    reference       operator[](size_type i)       { return data_[i]; }
-    const_reference operator[](size_type i) const { return data_[i]; }
+    constexpr reference       operator[](size_type i)       { return data_[i]; }
+    constexpr const_reference operator[](size_type i) const { return data_[i]; }
 
     reference at(size_type i) {
         if (i >= size_) 

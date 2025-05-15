@@ -62,8 +62,6 @@ struct is_same<T, T> : std::true_type {};
 template <typename T, typename U>
 constexpr bool is_same_v = is_same<T, U>::value;
 
-//--------------------------------------------------------------
-
 } // khan
 
 #endif // META_HPP

@@ -1,6 +1,7 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+#include <cstdint>
 #include <type_traits>
 
 namespace khan
@@ -29,6 +30,28 @@ constexpr T&& forward(typename std::remove_reference<T>::type&& t) noexcept {
     );
     return static_cast<T&&>(t);
 }
+
+//--------------------------------------------------------------
+
+template <size_t... I>
+struct index_sequence {};
+
+namespace detail {
+
+template <size_t N, size_t... I>
+struct make_index_sequence_impl : make_index_sequence_impl<N - 1, N - 1, I...> {};
+
+template <size_t... I>
+struct make_index_sequence_impl<0, I...> {
+    using type = index_sequence<I...>;
+};
+
+} // namespace detail
+
+template <size_t N>
+using make_index_sequence = typename detail::make_index_sequence_impl<N>::type;
+
+//--------------------------------------------------------------
 
 } // namespace khan
 

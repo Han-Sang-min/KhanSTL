@@ -40,8 +40,8 @@ public:
     constexpr size_type capacity() const  { return N; }
     constexpr bool      empty()    const  { return size_ == 0; }
 
-    char&       operator[](size_type i)        { return data_[i]; }
-    const char& operator[](size_type i) const  { return data_[i]; }
+    constexpr char&       operator[](size_type i)        { return data_[i]; }
+    constexpr const char& operator[](size_type i) const  { return data_[i]; }
 
     char& at(size_type i) {
         if (i > size_) 
