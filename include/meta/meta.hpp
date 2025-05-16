@@ -7,14 +7,37 @@
 namespace khan
 {
 
-namespace detail
-{
+//--------------------------------------------------------------
 
-/* Utile */
-template<typename First, typename Next>
-struct TypeList;
+template<typename... Ts>
+struct TypeList {};
 
-struct Nil {};
+// get the length
+template<typename List> 
+struct Length;
+
+template<typename... Ts>
+struct Length<TypeList<Ts...>> {
+    static constexpr std::size_t value = sizeof...(Ts);
+};
+
+// get the Nth type
+template<typename List, std::size_t N> 
+struct TypeAt;
+
+template<typename Head, typename... Tail>
+struct TypeAt<TypeList<Head, Tail...>, 0> {
+    using type = Head;
+};
+template<typename Head, typename... Tail, std::size_t N>
+struct TypeAt<TypeList<Head, Tail...>, N>
+  : TypeAt<TypeList<Tail...>, N-1> {};
+
+// convenience alias
+template<typename List, std::size_t N>
+using TypeAt_t = typename TypeAt<List, N>::type;
+    
+//--------------------------------------------------------------
 
 /* Max relative */
 template<typename T1, typename T2, bool condition = (sizeof(T1) > sizeof(T2))>
@@ -27,34 +50,32 @@ struct TypeMax<T1, T2, false> {
     using type = T2;
 };
 
-} // detail
-
 template<typename TypeList>
 struct MaxTypeFromList;
 
 template<>
-struct MaxTypeFromList<detail::Nil> {
+struct MaxTypeFromList<TypeList<>> {
     using type = uint8_t;
 };
 
-template<typename First, typename Next>
-struct MaxTypeFromList<detail::TypeList<First, Next> > 
-    : TypeMax<First, typename MaxTypeFromList<Next>::type > {};
+template<typename Head, typename... Tail>
+struct MaxTypeFromList<TypeList<Head, Tail...> > 
+    : TypeMax<Head, typename MaxTypeFromList<TypeList<Tail...> >::type > {};
 
 /* is in relative */
 template<typename T, typename List>
 struct isInList;
 
 template<typename T>
-struct isInList<T, detail::Nil> 
+struct isInList<T, TypeList<> > 
     : std::false_type {};
 
-template<typename T, typename First, typename Next>
-struct isInList<T, detail::TypeList<First, Next> >
+template<typename T, typename Head, typename... Tail>
+struct isInList<T, TypeList<Head, Tail...> >
     : std::conditional<
-        std::is_same<T, First>::value,
+        std::is_same<T, Head>::value,
         std::true_type,
-        typename isInList<T, Next>::type >::type {};
+        typename isInList<T, TypeList<Tail...> >::type >::type {};
 
 //--------------------------------------------------------------
 
