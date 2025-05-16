@@ -7,6 +7,9 @@
 namespace khan
 {
 
+namespace detail
+{
+
 /* Utile */
 template<typename First, typename Next>
 struct TypeList;
@@ -24,16 +27,18 @@ struct TypeMax<T1, T2, false> {
     using type = T2;
 };
 
+} // detail
+
 template<typename TypeList>
 struct MaxTypeFromList;
 
 template<>
-struct MaxTypeFromList<Nil> {
+struct MaxTypeFromList<detail::Nil> {
     using type = uint8_t;
 };
 
 template<typename First, typename Next>
-struct MaxTypeFromList<TypeList<First, Next> > 
+struct MaxTypeFromList<detail::TypeList<First, Next> > 
     : TypeMax<First, typename MaxTypeFromList<Next>::type > {};
 
 /* is in relative */
@@ -41,11 +46,11 @@ template<typename T, typename List>
 struct isInList;
 
 template<typename T>
-struct isInList<T, Nil> 
+struct isInList<T, detail::Nil> 
     : std::false_type {};
 
 template<typename T, typename First, typename Next>
-struct isInList<T, TypeList<First, Next> >
+struct isInList<T, detail::TypeList<First, Next> >
     : std::conditional<
         std::is_same<T, First>::value,
         std::true_type,

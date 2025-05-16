@@ -1,7 +1,7 @@
 #ifndef TUPLE_HPP
 #define TUPLE_HPP
 
-#include <cstddef>  // for std::size_t
+#include <cstddef>
 
 namespace khan {
 
@@ -27,7 +27,6 @@ public:
         : head(h), tail(t...) {}
 };
 
-// Primary Template
 template<std::size_t I, typename TupleT>
 struct TupleElement;
 
@@ -59,7 +58,6 @@ struct TupleElement<I, Tuple<Head, Tail...>> {
     }
 };
 
-// Const Tuple Specialization (Preserves const-correctness)
 template<std::size_t I, typename TupleT>
 struct TupleElement<I, const TupleT> {
     using type = typename TupleElement<I, TupleT>::type;

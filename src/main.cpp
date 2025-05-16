@@ -36,6 +36,8 @@ int main() {
         int
     >::value, "Element 1 must be int");
 
+    khan::Tuple<int, double, const char*> t5(42, 3.14, "hello");
+
     static_assert(khan::get<0>(tc) == 7, "tc[0] should be 7");
     static_assert(khan::get<1>(tc) == 8, "tc[1] should be 8");
 
