@@ -39,6 +39,41 @@ using TypeAt_t = typename TypeAt<List, N>::type;
     
 //--------------------------------------------------------------
 
+/**
+ * @brief Replaces the type at the specified index in a TypeList with a new type.
+ *
+ * This struct recursively traverses the `TypeList`, replacing the type at the
+ * specified index with `NewType`. The resulting list is a newly created `TypeList`
+ * with the updated type.
+ *
+ * @tparam Index The index of the type to be replaced.
+ * @tparam NewType The type that will replace the existing type at the specified index.
+ * @tparam List The `TypeList` to be modified.
+ *
+ * @note This implementation is recursive and constructs a new `TypeList` with the
+ *       modified type. The original `TypeList` remains unchanged.
+ *
+ * @code
+ * using OriginalList = TypeList<int, double, char>;
+ * using ModifiedList = ReplaceAt<1, float, OriginalList>::type;
+ * // Resulting ModifiedList: TypeList<int, float, char>
+ * @endcode
+ */
+template<size_t Index, typename NewType, typename List>
+struct ReplaceAt;
+
+template<size_t Index, typename NewType, typename Head, typename... Tail>
+struct ReplaceAt<Index, NewType, TypeList<Head, Tail...>> {
+    using type = TypeList<Head, typename ReplaceAt<Index - 1, NewType, TypeList<Tail...>>::type>;
+};
+
+template<typename NewType, typename Head, typename... Tail>
+struct ReplaceAt<0, NewType, TypeList<Head, Tail...>> {
+    using type = TypeList<NewType, Tail...>;
+};
+
+//--------------------------------------------------------------
+
 /* Max relative */
 template<typename T1, typename T2, bool condition = (sizeof(T1) > sizeof(T2))>
 struct TypeMax {
