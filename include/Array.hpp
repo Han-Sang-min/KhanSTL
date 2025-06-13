@@ -2,14 +2,15 @@
 #define ARRAY_HPP
 
 #include <cstddef>
+#include <cstdint>
 
 namespace khan {
 
-template<typename T, std::size_t N>
+template<typename T, uint32_t N>
 class Array {
 public:
     using value_type = T;
-    using size_type = std::size_t;
+    using size_type = uint32_t;
     using reference = T&;
     using const_reference = const T&;
     using pointer = T*;
