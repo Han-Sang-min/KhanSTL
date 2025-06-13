@@ -28,6 +28,14 @@ public:
         return N;
     }
 
+    constexpr size_type cnt() const noexcept {
+        size_type ret = 0;
+        for (size_type i = 0; i < N; ++i)
+            if (data_[i] != nullptr)
+                ret++;
+        return ret;
+    }
+
     constexpr reference       at(size_type i) {
         if (i >= N) error_trap();
         return data_[i];
