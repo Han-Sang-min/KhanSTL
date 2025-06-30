@@ -44,12 +44,12 @@ public:
     constexpr const char& operator[](size_type i) const  { return data_[i]; }
 
     char& at(size_type i) {
-        if (i > size_) 
+        if (i >= size_)
             error_trap();
         return data_[i];
     }
     const char& at(size_type i) const {
-        if (i > size_) 
+        if (i >= size_)
             error_trap();
         return data_[i];
     }
