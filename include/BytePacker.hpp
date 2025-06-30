@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <type_traits>
 
+namespace khan {
+
 /// BytePacker<HB, LB> splits a 32-bit word into HB high bytes and LB low bytes,
 /// and can recombine them.  HB+LB must be ≤4.
 template <size_t HB, size_t LB>
@@ -52,5 +54,7 @@ struct BytePacker {
     // combine them back → 0xAB123456
     constexpr auto back = Splitter1_3::combine(h, l);
 */
+
+} // namespace khan
 
 #endif // BYTE_PACKER_HPP
